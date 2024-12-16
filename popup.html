@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select and Translate</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>Select and Translate</h2>
+      <select id="translationEngine">
+        <option value="google">Google Translate</option>
+        <option value="gemini">Gemini</option>
+      </select>
+    </div>
+    
+    <div id="geminiConfig" class="config-section">
+      <label for="geminiApiKey">Gemini API Key:</label>
+      <input type="password" id="geminiApiKey" placeholder="Enter your Gemini API Key">
+      <button id="saveApiKey">Save</button>
+    </div>
+
+    <div class="translation-section">
+      <div id="translationResult"></div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 
