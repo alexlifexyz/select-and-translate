@@ -76,40 +76,44 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   log('Received message:', request);
   
   if (request.action === 'translate') {
-    (async () => {
-      try {
-        if (request.engine === 'google') {
-          log('Using Google Translate engine');
-          const translation = await googleTranslate(request.text);
-          log('Translation successful:', translation);
+    // Handle Google Translate
+    if (request.engine === 'google') {
+      googleTranslate(request.text)
+        .then(translation => {
+          log('Google translation successful:', translation);
           sendResponse({ translation });
-        } else if (request.engine === 'gemini') {
-          log('Using Gemini engine');
-          // Get Gemini API key from storage
-          chrome.storage.sync.get(['geminiApiKey'], async (result) => {
-            if (!result.geminiApiKey) {
-              log('Gemini API key not configured');
-              sendResponse({ error: 'Gemini API key not configured' });
-              return;
-            }
-            try {
-              const translation = await geminiTranslate(request.text, result.geminiApiKey);
-              log('Translation successful:', translation);
-              sendResponse({ translation });
-            } catch (error) {
-              log('Translation failed:', error);
-              sendResponse({ error: error.message });
-            }
-          });
-        } else {
-          log('Unknown translation engine:', request.engine);
-          sendResponse({ error: 'Unknown translation engine' });
+        })
+        .catch(error => {
+          log('Google translation failed:', error);
+          sendResponse({ error: error.message });
+        });
+    }
+    // Handle Gemini
+    else if (request.engine === 'gemini') {
+      chrome.storage.sync.get(['geminiApiKey'], result => {
+        if (!result.geminiApiKey) {
+          log('Gemini API key not configured');
+          sendResponse({ error: 'Gemini API key not configured' });
+          return;
         }
-      } catch (error) {
-        log('Translation failed:', error);
-        sendResponse({ error: error.message });
-      }
-    })();
+        
+        geminiTranslate(request.text, result.geminiApiKey)
+          .then(translation => {
+            log('Gemini translation successful:', translation);
+            sendResponse({ translation });
+          })
+          .catch(error => {
+            log('Gemini translation failed:', error);
+            sendResponse({ error: error.message });
+          });
+      });
+    }
+    // Handle unknown engine
+    else {
+      log('Unknown translation engine:', request.engine);
+      sendResponse({ error: 'Unknown translation engine' });
+    }
+    
     return true; // Will respond asynchronously
   }
 }); 
