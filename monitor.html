@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Extension Monitor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background-color: #4285f4;
+      color: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background-color: white;
+      border-radius: 4px;
+      padding: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status.healthy { background-color: #34a853; color: white; }
+    .status.error { background-color: #ea4335; color: white; }
+    .status.inactive { background-color: #fbbc05; color: white; }
+    .status.unknown { background-color: #9aa0a6; color: white; }
+
+    .log-entry {
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .timestamp {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .error {
+      color: #ea4335;
+    }
+
+    .controls {
+      margin-bottom: 20px;
+    }
+
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #357abd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Extension Monitor</h1>
+    </div>
+
+    <div class="controls">
+      <button id="refreshBtn">Refresh Data</button>
+      <button id="clearLogsBtn">Clear Logs</button>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Components Status</h3>
+        <div id="componentsStatus"></div>
+      </div>
+
+      <div class="card">
+        <h3>Recent Messages</h3>
+        <div id="recentMessages"></div>
+      </div>
+
+      <div class="card">
+        <h3>Error Log</h3>
+        <div id="errorLog"></div>
+      </div>
+
+      <div class="card">
+        <h3>Storage Changes</h3>
+        <div id="storageChanges"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import monitor from './monitor.js';
+
+    // Update components status
+    function updateComponentsStatus() {
+      const statusDiv = document.getElementById('componentsStatus');
+      const components = monitor.getAllComponentsStatus();
+      
+      statusDiv.innerHTML = Object.entries(components)
+        .map(([name, data]) => {
+          const health = monitor.checkComponentHealth(name);
+          return `
+            <div class="log-entry">
+              <strong>${name}</strong>
+              <span class="status ${health}">${health}</span><br>
+              <small>Messages: ${data.messageCount}, Errors: ${data.errors.length}</small>
+            </div>
+          `;
+        })
+        .join('');
+    }
+
+    // Update recent messages
+    function updateRecentMessages() {
+      const messagesDiv = document.getElementById('recentMessages');
+      const logs = monitor.getRecentLogs(10);
+      
+      messagesDiv.innerHTML = logs
+        .map(log => `
+          <div class="log-entry">
+            <span class="timestamp">${new Date(log.timestamp).toLocaleTimeString()}</span><br>
+            <strong>${log.type}</strong>: ${JSON.stringify(log.message)}
+          </div>
+        `)
+        .join('');
+    }
+
+    // Update error log
+    function updateErrorLog() {
+      const errorDiv = document.getElementById('errorLog');
+      const components = monitor.getAllComponentsStatus();
+      
+      errorDiv.innerHTML = Object.entries(components)
+        .flatMap(([name, data]) => data.errors)
+        .sort((a, b) => b.timestamp - a.timestamp)
+        .slice(0, 10)
+        .map(error => `
+          <div class="log-entry error">
+            <span class="timestamp">${new Date(error.timestamp).toLocaleTimeString()}</span><br>
+            ${error.error}
+          </div>
+        `)
+        .join('');
+    }
+
+    // Update storage changes
+    function updateStorageChanges() {
+      const storageDiv = document.getElementById('storageChanges');
+      const logs = monitor.getRecentLogs(10)
+        .filter(log => log.type === 'storage');
+      
+      storageDiv.innerHTML = logs
+        .map(log => `
+          <div class="log-entry">
+            <span class="timestamp">${new Date(log.timestamp).toLocaleTimeString()}</span><br>
+            <strong>${log.namespace}</strong>: ${JSON.stringify(log.changes)}
+          </div>
+        `)
+        .join('');
+    }
+
+    // Update all panels
+    function updateAll() {
+      updateComponentsStatus();
+      updateRecentMessages();
+      updateErrorLog();
+      updateStorageChanges();
+    }
+
+    // Initialize
+    document.getElementById('refreshBtn').addEventListener('click', updateAll);
+    document.getElementById('clearLogsBtn').addEventListener('click', () => {
+      monitor.clearLogs();
+      updateAll();
+    });
+
+    // Update every 5 seconds
+    updateAll();
+    setInterval(updateAll, 5000);
+  </script>
+</body>
+</html> 

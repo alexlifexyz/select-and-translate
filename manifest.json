@@ -6,8 +6,13 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "tabs"
   ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Select and Translate"
+  },
   "host_permissions": [
     "https://translate.googleapis.com/*",
     "https://generativelanguage.googleapis.com/*",
@@ -16,9 +21,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "all_frames": true,
-      "run_at": "document_end"
+      "js": ["content.js"]
     }
   ],
   "background": {
@@ -26,7 +29,7 @@
     "type": "module"
   },
   "web_accessible_resources": [{
-    "resources": ["popup.html", "styles.css"],
+    "resources": ["monitor.html", "monitor.js"],
     "matches": ["<all_urls>"]
   }]
 } 

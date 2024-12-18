@@ -2,12 +2,45 @@
 <html>
 <head>
   <title>Select and Translate</title>
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      width: 300px;
+      padding: 15px;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    select, input, button {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #357abd;
+    }
+    .config-section {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h2>Select and Translate</h2>
+    <h2>Select and Translate</h2>
+    <div>
+      <label for="translationEngine">Translation Engine:</label>
       <select id="translationEngine">
         <option value="google">Google Translate</option>
         <option value="gemini">Gemini</option>
@@ -17,13 +50,10 @@
     <div id="geminiConfig" class="config-section">
       <label for="geminiApiKey">Gemini API Key:</label>
       <input type="password" id="geminiApiKey" placeholder="Enter your Gemini API Key">
-      <button id="saveApiKey">Save</button>
-    </div>
-
-    <div class="translation-section">
-      <div id="translationResult"></div>
+      <button id="saveApiKey">Save API Key</button>
     </div>
   </div>
+
   <script src="popup.js"></script>
 </body>
 </html> 

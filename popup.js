@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Load saved settings
   chrome.storage.sync.get(['translationEngine', 'geminiApiKey'], (result) => {
+    console.log('Loading saved settings');
     if (result.translationEngine) {
       engineSelect.value = result.translationEngine;
     }
@@ -17,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle translation engine change
   engineSelect.addEventListener('change', () => {
+    console.log('Translation engine changed to:', engineSelect.value);
     chrome.storage.sync.set({ translationEngine: engineSelect.value });
     updateGeminiConfigVisibility();
   });
@@ -25,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
   saveButton.addEventListener('click', () => {
     const apiKey = geminiApiKeyInput.value.trim();
     if (apiKey) {
+      console.log('Saving Gemini API key');
       chrome.storage.sync.set({ geminiApiKey: apiKey }, () => {
         alert('Gemini API Key saved successfully!');
       });
